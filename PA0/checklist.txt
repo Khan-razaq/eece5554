@@ -1,0 +1,3 @@
+Done installing Ubuntu 20.04 LTS
+Getting to start with Git
+Fun fact - Ubuntu releases are codenamed using an adjective and an animal name in alphabetical order!!
