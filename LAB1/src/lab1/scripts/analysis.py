@@ -1,24 +1,64 @@
-import bagpy
-from bagpy import bagreader
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sea
-import pandas as pd
+#!/usr/bin/env python3
 
-bag = bagreader('/home/anuj/catkin_ws/src/beginner_tutorials/rosbags/stationary_data.bag')
-bag.topic_table
-data = bag.message_by_topic('/gpgga_data')
-readings = pd.read_csv(data)
-readings['utm_easting'] = readings['utm_easting'] - readings['utm_easting'].min()
-readings['utm_northing'] = readings['utm_northing'] - readings['utm_northing'].min()
-print(readings[['utm_easting', 'utm_northing']])
-print(readings)
-plt.rcParams.update({'font.size': 40})
-readings[['utm_easting','utm_northing']].plot()
-fig, ax = bagpy.create_fig(1)
-ax[0].scatter(x = 'utm_easting', y = 'utm_northing', data = readings, s= 100, label = 'utm_easting.data VS utm_northing.data')
-for axis in ax:
-    axis.legend()
-    axis.set_xlabel('utm_easting', fontsize=40)
-    axis.set_ylabel('utm_northing', fontsize=40)
-plt.show()
+import matplotlib.pyplot as plt
+import rosbag
+
+if __name__ == '__main__':
+    
+    def extract_bag_data(filepath):
+        east_vals = []
+        north_vals = []
+        time_vals = []
+        alt_vals = []
+
+        with rosbag.Bag(filepath) as bag:
+            for _, message, _ in bag.read_messages(topics=['/gps_pub']):
+                east_vals.append(message.utm_easting)
+                north_vals.append(message.utm_northing)
+                time_vals.append(message.header.stamp.secs)
+                alt_vals.append(message.altitude)
+
+        return east_vals, north_vals, time_vals, alt_vals
+
+    def compute_vals(values):
+        base_val = min(values)
+        return [val - base_val for val in values]
+    
+    stationary_filepath = 'stationary_data.bag'
+    walking_filepath = 'walking_data.bag'
+
+    stat_east, stat_north, stat_time, stat_alt = extract_bag_data(stationary_filepath)
+    walk_east, walk_north, walk_time, walk_alt = extract_bag_data(walking_filepath)
+
+    stat_east = compute_vals(stat_east)
+    stat_north = compute_vals(stat_north)
+
+    walk_east = compute_vals(walk_east)
+    walk_north = compute_vals(walk_north)
+
+    # Plotting data
+    main_fig = plt.figure(figsize=(12, 8))
+
+    stationary_plot = main_fig.add_subplot(2, 2, 1)
+    stationary_plot.plot(stat_east, stat_north, 'bo', label='Data Points')
+    stationary_plot.set_title("Stationary Data")
+    stationary_plot.set_xlabel("UTM-Easting")
+    stationary_plot.set_ylabel("UTM-Northing")
+    stationary_plot.legend(loc="upper right")
+
+    altitude_plot = main_fig.add_subplot(2, 2, 2)
+    altitude_plot.plot(walk_time, walk_alt, 'g-', label='Altitude')
+    altitude_plot.set_title("Walking Data: Altitude vs. Time")
+    altitude_plot.set_xlabel("Time (seconds)")
+    altitude_plot.set_ylabel("Altitude (meters)")
+    altitude_plot.legend(loc="upper right")
+
+    walking_plot = main_fig.add_subplot(2, 2, 3)
+    walking_plot.plot(walk_east, walk_north, 'b-', label='Walking Data')
+    walking_plot.set_title("Walking Data")
+    walking_plot.set_xlabel("UTM-Easting")
+    walking_plot.set_ylabel("UTM-Northing")
+    walking_plot.legend(loc="upper right")
+
+    plt.tight_layout()
+    plt.show()
