@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import sys
@@ -35,7 +35,11 @@ if __name__ == '__main__':
     rospy.init_node('gps_driver')
     gps_publisher = rospy.Publisher('/gps_pub', gps_msg, queue_size=10)
     ser = serial.Serial('/dev/ttyUSB1', 4800, timeout=2.)
-    
+    if len(sys.argv)>0:
+        rospy.loginfo(sys.argv[1])
+        gps_serial_port = rospy.get_param('~port',sys.argv[1])
+    elif sys.argv[1] == '':
+        gps_serial_port = rospy.get_param('~port', '/dev/ttyUSB0')
     try:
         while not rospy.is_shutdown():
             data = ser.readline().strip()
