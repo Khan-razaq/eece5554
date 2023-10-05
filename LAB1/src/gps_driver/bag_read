@@ -1,0 +1,18 @@
+import rosbag
+
+# Specify the path to your bag file
+bag_file = '/home/saad/razaq_ws/src/data/stationary_data.bag'
+
+# Open the bag file
+bag = rosbag.Bag(bag_file)
+
+try:
+    # Iterate through messages in the bag file
+    for topic, msg, t in bag.read_messages():
+        # Process the message (you can replace this with your own processing logic)
+        print "Topic: {}, Timestamp: {}, Message: {}".format(topic, t, msg)
+
+finally:
+    # Close the bag file when done
+    bag.close()
+

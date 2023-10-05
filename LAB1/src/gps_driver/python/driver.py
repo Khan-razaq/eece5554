@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import rospy
 import sys
 import serial
 import utm
-from lab1.msg import gps_msg
+from gps_driver.msg import gps_msg
 
 def gpgga_filter(data):
     fields = data.split(',')
@@ -28,22 +28,23 @@ def gpgga_filter(data):
     return latitude, longitude, altitude, time_str
 
 if __name__ == '__main__':
-    rospy.init_node('gps_driver')
-    
+    rospy.init_node('driver_node')
+   
     if not rospy.has_param('~port'):
         rospy.logerr("No port parameter provided.")
         sys.exit(1)
-    
+
     gps_serial_port = rospy.get_param('~port')
     ser = serial.Serial(gps_serial_port, 4800, timeout=2.)
 
+    
     gps_publisher = rospy.Publisher('/gps_pub', gps_msg, queue_size=10)
 
     try:
         while not rospy.is_shutdown():
             data = ser.readline().strip()
             gpgga_data = gpgga_filter(data)
-            
+            print(gpgga_data)
             if gpgga_data:
                 latitude, longitude, altitude, time_str = gpgga_data
                 
@@ -79,3 +80,4 @@ if __name__ == '__main__':
         rospy.loginfo("Shutting down puck")
     except Exception as e:
         rospy.logerr("An error occurred: %s", str(e))
+
