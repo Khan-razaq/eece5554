@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy
 import sys
@@ -29,22 +29,32 @@ def gpgga_filter(data):
 
 if __name__ == '__main__':
     rospy.init_node('driver_node')
-   
-    if not rospy.has_param('~port'):
+
+    # Read port either from command line or ROS parameter
+    if len(sys.argv) > 1:
+        gps_serial_port = sys.argv[1]
+    elif rospy.has_param('~port'):
+        gps_serial_port = rospy.get_param('~port')
+    else:
         rospy.logerr("No port parameter provided.")
         sys.exit(1)
 
-    gps_serial_port = rospy.get_param('~port')
-    ser = serial.Serial(gps_serial_port, 4800, timeout=2.)
+    rospy.loginfo("GPS Serial Port: %s", gps_serial_port)
 
+    try:
+        ser = serial.Serial(gps_serial_port, 4800, timeout=2.)
+    except Exception as e:
+        rospy.logerr("Error opening serial port: %s", str(e))
+        sys.exit(1)
     
-    gps_publisher = rospy.Publisher('/gps_pub', gps_msg, queue_size=10)
+    gps_publisher = rospy.Publisher('/gps', gps_msg, queue_size=10)
 
     try:
         while not rospy.is_shutdown():
             data = ser.readline().strip()
+            print(data)
             gpgga_data = gpgga_filter(data)
-            print(gpgga_data)
+
             if gpgga_data:
                 latitude, longitude, altitude, time_str = gpgga_data
                 
@@ -63,7 +73,7 @@ if __name__ == '__main__':
 
                 gps_data = gps_msg()
                 gps_data.header.stamp = timestamp_from_gpgga
-                gps_data.header.frame_id = "GPS1_Frame"
+                gps_data.header.frame_id = "GPS1_FRAME"
                 gps_data.latitude = latitude
                 gps_data.longitude = longitude
                 gps_data.altitude = altitude
