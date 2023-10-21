@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     try:
         while not rospy.is_shutdown():
-            data = ser.readline().strip()
+            data = ser.readline().decode('utf-8').strip()
             print(data)
             gpgga_data = gpgga_filter(data)
 
