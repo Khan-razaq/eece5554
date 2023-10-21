@@ -8,24 +8,26 @@ from gps_driver.msg import gps_msg
 
 def gpgga_filter(data):
     fields = data.split(',')
-    if len(fields) < 15 or fields[0] != "$GPGGA":
+    if len(fields) < 15:
         return None
+    if "$GPGGA" in data:  # Checking the entire data string
+        latitude_deg = float(fields[2][:2])
+        latitude_min = float(fields[2][2:])
+        latitude = latitude_deg + latitude_min/60.0
+        if fields[3] == 'S':
+            latitude = -latitude
 
-    latitude_deg = float(fields[2][:2])
-    latitude_min = float(fields[2][2:])
-    latitude = latitude_deg + latitude_min/60.0
-    if fields[3] == 'S':
-        latitude = -latitude
+        longitude_deg = float(fields[4][:3])
+        longitude_min = float(fields[4][3:])
+        longitude = longitude_deg + longitude_min/60.0
+        if fields[5] == 'W':
+            longitude = -longitude
 
-    longitude_deg = float(fields[4][:3])
-    longitude_min = float(fields[4][3:])
-    longitude = longitude_deg + longitude_min/60.0
-    if fields[5] == 'W':
-        longitude = -longitude
-
-    altitude = float(fields[9])
-    time_str = fields[1]
-    return latitude, longitude, altitude, time_str
+        altitude = float(fields[9])
+        time_str = fields[1]
+        return latitude, longitude, altitude, time_str
+    else:
+        return None
 
 if __name__ == '__main__':
     rospy.init_node('driver_node')
