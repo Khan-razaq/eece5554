@@ -59,6 +59,7 @@ if __name__ == '__main__':
     else:
         rospy.logerr("No port parameter provided.")
         sys.exit(1)
+    
     rospy.loginfo("IMU Serial Port: %s", imu_serial_port)
 
     try:
@@ -82,28 +83,28 @@ if __name__ == '__main__':
                 quaternion = euler_to_quaternion(roll, pitch, yaw)
 
                 imu_data = imu_msg()
-		imu_data.Header.stamp = rospy.Time.now()
-		imu_data.Header.frame_id = "IMU1_Frame"
+                imu_data.Header.stamp = rospy.Time.now()
+                imu_data.Header.frame_id = "IMU1_Frame"
 
-		# IMU data
-		imu_data.IMU.angular_velocity.x = gyro[0]                
-   	        imu_data.IMU.angular_velocity.y = gyro[1] 
+                # IMU data
+                imu_data.IMU.angular_velocity.x = gyro[0]
+                imu_data.IMU.angular_velocity.y = gyro[1]
                 imu_data.IMU.angular_velocity.z = gyro[2]
-		imu_data.IMU.linear_acceleration.x = accel[0]
+                imu_data.IMU.linear_acceleration.x = accel[0]
                 imu_data.IMU.linear_acceleration.y = accel[1]
                 imu_data.IMU.linear_acceleration.z = accel[2]
-		imu_data.IMU.orientation.w = quaternion[0]
+                imu_data.IMU.orientation.w = quaternion[0]
                 imu_data.IMU.orientation.x = quaternion[1]
                 imu_data.IMU.orientation.y = quaternion[2]
                 imu_data.IMU.orientation.z = quaternion[3]
 
-		# Magnetic field data
-		imu_data.MagField.magnetic_field.x = magnetometer[0]
+                # Magnetic field data
+                imu_data.MagField.magnetic_field.x = magnetometer[0]
                 imu_data.MagField.magnetic_field.y = magnetometer[1]
                 imu_data.MagField.magnetic_field.z = magnetometer[2]
 
-		# Raw data
-		imu_data.raw_data = data
+                # Raw data
+                imu_data.raw_data = data
 
                 imu_publisher.publish(imu_data)
 
@@ -113,4 +114,3 @@ if __name__ == '__main__':
         rospy.loginfo("Shutting down imu driver")
     except Exception as e:
         rospy.logerr("An error occurred: %s", str(e))
-
