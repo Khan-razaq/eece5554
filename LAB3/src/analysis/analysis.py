@@ -35,8 +35,8 @@ def extract_imu_data(filepath):
             yaw.append(euler[2])
             time_vals.append(message.header.stamp.secs)
             magfield_x.append(message.MagField.magnetic_field.x)
-	    magfield_y.append(message.MagField.magnetic_field.y)
-	    magfield_z.append(message.MagField.magnetic_field.z)
+            magfield_y.append(message.MagField.magnetic_field.y)
+            magfield_z.append(message.MagField.magnetic_field.z)
 
     return time_vals, lin_acc_x, lin_acc_y, lin_acc_z, ang_vel_x, ang_vel_y, ang_vel_z, roll, pitch, yaw, magfield_x, magfield_y, magfield_z
 
@@ -46,7 +46,7 @@ def scale_time_to_range(time, original_min, original_max, new_min, new_max):
 
 def calculate_rmse(data, ref_value):
     """Calculate the root mean square error of the data with respect to a reference value."""
-    data_array = np.array(data)  # Convert the list to a numpy array
+    data_array = np.array(data)
     return np.sqrt(np.mean((data_array - ref_value) ** 2))
 
 def plot_individual(time, data, title, ylabel, subplot_num, color):
@@ -54,7 +54,7 @@ def plot_individual(time, data, title, ylabel, subplot_num, color):
     ax.plot(time, data, color=color)
     ax.set_title(title)
     ax.set_ylabel(ylabel)
-    ax.set_xlabel("Time (s)") 
+    ax.set_xlabel("Time (s)")
     mean_val = np.mean(data)
     std_val = np.std(data)
     rmse1 = calculate_rmse(data, mean_val)
